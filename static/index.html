@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email MCP Studio — Intelligent Automated Email Scheduler</title>
+  <meta name="description" content="Interactive dashboard and real-time controller for the Email MCP Server. Schedule, monitor, and dispatch emails with down-to-the-second precision.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5C2 7 4 5 6.5 5H18c2 0 4 2 4 4.5V17z"></path>
+            <polyline points="2,9 12,15 22,9"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Email MCP <span>Studio</span></h1>
+          <p class="brand-subtitle">Automated Scheduling & Dispatch Control Center</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="system-status-pill" id="systemStatusPill">
+          <span class="status-dot pulsing"></span>
+          <span class="status-text">Server Active</span>
+        </div>
+        
+        <button id="refreshBtn" class="btn btn-secondary icon-btn" title="Refresh Data">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/>
+          </svg>
+        </button>
+
+        <button id="openComposeBtn" class="btn btn-primary glow-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Compose / Schedule</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Metrics Bar -->
+    <section class="metrics-grid">
+      <div class="metric-card glass-card">
+        <div class="metric-header">
+          <span class="metric-label">Total Emails</span>
+          <div class="metric-icon total-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value" id="statTotal">0</div>
+        <div class="metric-footer">Lifetime jobs processed</div>
+      </div>
+
+      <div class="metric-card glass-card">
+        <div class="metric-header">
+          <span class="metric-label">Pending Delivery</span>
+          <div class="metric-icon pending-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value pending-color" id="statPending">0</div>
+        <div class="metric-footer">Scheduled in queue</div>
+      </div>
+
+      <div class="metric-card glass-card">
+        <div class="metric-header">
+          <span class="metric-label">Delivered Successfully</span>
+          <div class="metric-icon sent-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value sent-color" id="statSent">0</div>
+        <div class="metric-footer">Confirmed sent via provider</div>
+      </div>
+
+      <div class="metric-card glass-card">
+        <div class="metric-header">
+          <span class="metric-label">Cancelled / Failed</span>
+          <div class="metric-icon failed-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="metric-value failed-color" id="statFailed">0</div>
+        <div class="metric-footer">Cancelled or delivery errors</div>
+      </div>
+    </section>
+
+    <!-- Providers Status Banner -->
+    <section class="providers-bar glass-card">
+      <div class="providers-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+        <span>Active Dispatch Providers:</span>
+      </div>
+      <div class="providers-list" id="providersList">
+        <!-- Rendered dynamically -->
+        <div class="provider-pill loading-pill">Loading providers...</div>
+      </div>
+    </section>
+
+    <!-- Main Content Area: Email Table & Controls -->
+    <main class="main-card glass-card">
+      <div class="table-controls">
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-status="all">All (<span id="countAll">0</span>)</button>
+          <button class="filter-btn" data-status="pending">Pending (<span id="countPending">0</span>)</button>
+          <button class="filter-btn" data-status="sent">Sent (<span id="countSent">0</span>)</button>
+          <button class="filter-btn" data-status="cancelled">Cancelled</button>
+          <button class="filter-btn" data-status="failed">Failed</button>
+        </div>
+
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search by recipient or subject...">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="email-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Recipient</th>
+              <th>Subject</th>
+              <th>Scheduled Time / Countdown</th>
+              <th>Provider</th>
+              <th>Created</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="emailTableBody">
+            <tr>
+              <td colspan="7" class="empty-state">Loading scheduled emails...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Compose & Schedule Modal -->
+  <div class="modal-overlay" id="composeModal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <div class="modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Compose & Schedule Email</h2>
+            <p class="modal-subtitle">Instant dispatch or automated future delivery</p>
+          </div>
+        </div>
+        <button class="close-modal-btn" id="closeComposeBtn">&times;</button>
+      </div>
+
+      <form id="composeForm" class="modal-form">
+        <!-- Recipient -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="recipientInput">Recipient Email <span class="required">*</span></label>
+            <div class="quick-chips">
+              <span class="chip-text">Quick:</span>
+              <button type="button" class="quick-chip" id="chipMyself">My Email</button>
+            </div>
+          </div>
+          <input type="email" id="recipientInput" placeholder="e.g. client@example.com or user@gmail.com" required>
+        </div>
+
+        <!-- Subject -->
+        <div class="form-group">
+          <label for="subjectInput">Subject Line <span class="required">*</span></label>
+          <input type="text" id="subjectInput" placeholder="e.g. Weekly Project Update" required>
+        </div>
+
+        <!-- Provider and Format Selector -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="providerSelect">Delivery Provider</label>
+            <select id="providerSelect">
+              <option value="auto">Auto-Detect (Default configured)</option>
+              <option value="smtp">Gmail SMTP (arunraghav3006@gmail.com)</option>
+              <option value="resend">Resend API</option>
+              <option value="mock">Dry-Run / Mock Simulator</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="formatSelect">Body Format</label>
+            <select id="formatSelect">
+              <option value="plain">Plain Text</option>
+              <option value="html">HTML Rich Markup</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="bodyInput">Message Body <span class="required">*</span></label>
+            <div class="body-tabs">
+              <button type="button" class="tab-btn active" id="tabWrite">Write</button>
+              <button type="button" class="tab-btn" id="tabPreview">Preview</button>
+            </div>
+          </div>
+          <textarea id="bodyInput" rows="6" placeholder="Write your message here... Supports HTML tags if HTML format is selected." required></textarea>
+          <div id="previewArea" class="preview-box hidden"></div>
+        </div>
+
+        <!-- Scheduling Options -->
+        <div class="form-group scheduling-section">
+          <label>Delivery Timing</label>
+          <div class="quick-timing-chips">
+            <button type="button" class="timing-chip" data-time="now">⚡ Send Now</button>
+            <button type="button" class="timing-chip" data-time="in 5 minutes">+5 Mins</button>
+            <button type="button" class="timing-chip" data-time="in 15 minutes">+15 Mins</button>
+            <button type="button" class="timing-chip" data-time="in 1 hour">+1 Hour</button>
+            <button type="button" class="timing-chip" data-time="tomorrow at 9:00am">Tomorrow 9 AM</button>
+            <button type="button" class="timing-chip" data-time="today at 5:00pm">Today 5 PM</button>
+          </div>
+
+          <div class="custom-time-inputs">
+            <div class="flex-1">
+              <span class="sub-label">Natural Expression or Custom Time:</span>
+              <input type="text" id="timeExpressionInput" placeholder="e.g. 'in 25 minutes' or 'tomorrow at 10am'">
+            </div>
+            <div class="or-divider">OR</div>
+            <div class="flex-1">
+              <span class="sub-label">Exact Date & Time Picker:</span>
+              <input type="datetime-local" id="datetimePicker">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelComposeBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary glow-btn" id="submitComposeBtn">
+            <span id="submitBtnText">Schedule Email</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Email Details Modal -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <div class="modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title" id="detailSubject">Email Details</h2>
+            <p class="modal-subtitle" id="detailJobId">Job ID: ...</p>
+          </div>
+        </div>
+        <button class="close-modal-btn" id="closeDetailsBtn">&times;</button>
+      </div>
+
+      <div class="details-content">
+        <div class="detail-row">
+          <span class="detail-key">Recipient:</span>
+          <span class="detail-val" id="detailRecipient">...</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Status:</span>
+          <span class="detail-val" id="detailStatus">...</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Scheduled For:</span>
+          <span class="detail-val" id="detailScheduledTime">...</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Provider:</span>
+          <span class="detail-val" id="detailProvider">...</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Sent Timestamp:</span>
+          <span class="detail-val" id="detailSentAt">—</span>
+        </div>
+        <div class="detail-row" id="errorRow" style="display: none;">
+          <span class="detail-key error-color">Error Message:</span>
+          <span class="detail-val error-color" id="detailError">...</span>
+        </div>
+
+        <div class="body-view-section">
+          <h3 class="body-view-heading">Message Body Content:</h3>
+          <div class="body-view-card" id="detailBody">...</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="closeDetailsBtnFooter">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
