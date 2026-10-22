@@ -1,6 +1,6 @@
 /**
  * Email MCP Studio — Frontend Controller
- * Real-time interaction, live countdowns, modals, and API calls.
+ * Fully responsive: desktop, tablet, and mobile adaptive.
  */
 
 const API_BASE = "";
@@ -213,10 +213,12 @@ function renderBodyPreview() {
 
 function openModal(modal) {
   modal.classList.add("active");
+  document.body.style.overflow = "hidden"; // Prevent background scroll on mobile
 }
 
 function closeModal(modal) {
   modal.classList.remove("active");
+  document.body.style.overflow = "";
 }
 
 // -------------------------------------------------------------
@@ -264,7 +266,7 @@ function renderProviders(providers) {
   resendPill.className = `provider-pill ${resend.configured ? "active" : "inactive"}`;
   resendPill.innerHTML = `
     <span class="dot" style="background:${resend.configured ? '#10b981' : '#6b7280'}"></span>
-    <span>Resend API: ${resend.configured ? "Ready (" + (resend.from || "onboarding@resend.dev") + ")" : "Inactive"}</span>
+    <span>Resend: ${resend.configured ? (resend.from || "Ready") : "Inactive"}</span>
   `;
   providersList.appendChild(resendPill);
 
@@ -273,7 +275,7 @@ function renderProviders(providers) {
   dbPill.className = "provider-pill active";
   dbPill.innerHTML = `
     <span class="dot"></span>
-    <span>SQLite Storage: Active (WAL)</span>
+    <span>SQLite Engine: Active</span>
   `;
   providersList.appendChild(dbPill);
 }
@@ -317,32 +319,38 @@ function renderEmailTable(emails) {
     const createdDate = new Date(email.created_at);
 
     return `
-      <tr data-job-id="${email.id}" data-scheduled-utc="${email.scheduled_time}">
-        <td>
+      <tr class="email-row" data-job-id="${email.id}" data-scheduled-utc="${email.scheduled_time}">
+        <td class="cell-status" data-label="Status">
           <span class="status-badge ${statusClass}">
             <span class="dot"></span>
             ${email.status}
           </span>
         </td>
-        <td class="table-recipient">${escapeHtml(email.recipient)}</td>
-        <td>
+        <td class="cell-recipient" data-label="Recipient">
+          <div class="recipient-wrapper">
+            <span class="mobile-field-label">To:</span>
+            <span class="table-recipient">${escapeHtml(email.recipient)}</span>
+          </div>
+        </td>
+        <td class="cell-subject" data-label="Subject">
           <div class="table-subject" title="${escapeHtml(email.subject)}">
             ${escapeHtml(email.subject)}
           </div>
         </td>
-        <td>
-          <div style="font-weight: 500;">${formatDateTime(schedDate)}</div>
+        <td class="cell-time" data-label="Scheduled Time">
+          <div class="time-main">${formatDateTime(schedDate)}</div>
           ${isPending ? `<div class="countdown-chip countdown-val">Calculating...</div>` : ""}
         </td>
-        <td>
-          <span style="font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; color: var(--text-muted);">
-            ${escapeHtml(email.provider || "auto")}
-          </span>
+        <td class="cell-provider" data-label="Provider">
+          <div class="provider-wrapper">
+            <span class="mobile-field-label">Via:</span>
+            <span class="provider-tag">${escapeHtml(email.provider || "auto")}</span>
+          </div>
         </td>
-        <td style="color: var(--text-faint); font-size: 13px;">
-          ${formatRelativeTime(createdDate)}
+        <td class="cell-created" data-label="Created">
+          <span class="created-time">${formatRelativeTime(createdDate)}</span>
         </td>
-        <td>
+        <td class="cell-actions" data-label="Actions">
           <div class="table-actions">
             <button class="action-btn" title="View Details" onclick="viewEmailDetails('${email.id}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -561,8 +569,7 @@ function formatDateTime(date) {
     month: "short",
     day: "numeric",
     hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
+    minute: "2-digit"
   });
 }
 
